@@ -1,13 +1,14 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QDialog, QPushButton
-from PyQt5.uic import loadUi
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QDialog, QPushButton
 import sqlite3
+from main_ui import Ui_MainWindow
+from addEditCoffeeForm_ui import Ui_AddEditCoffeeForm
 
 
-class AddEditCoffeeForm(QDialog):
+class AddEditCoffeeForm(QDialog, Ui_AddEditCoffeeForm):
     def __init__(self, old_value=None):
         super().__init__()
-        loadUi("addEditCoffeeForm.ui", self)
+        self.setupUi(self)
         self.old_value = old_value
         if old_value:
             self.setFieldsValues(old_value)
@@ -31,7 +32,7 @@ class AddEditCoffeeForm(QDialog):
         price = self.priceDoubleSpinBox.value()
         volume = self.volumeLineEdit.text()
 
-        conn = sqlite3.connect('coffee.sqlite')
+        conn = sqlite3.connect('data/coffee.sqlite')
         cursor = conn.cursor()
         if self.old_value:
             cursor.execute(f"UPDATE coffee SET name=?, roast=?, type=?, description=?, price=?, volume=? WHERE ID=?",
@@ -45,20 +46,20 @@ class AddEditCoffeeForm(QDialog):
         self.close()
 
 
-class CoffeeApp(QMainWindow):
+class CoffeeApp(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
+        self.setupUi(self)
         self.initUI()
 
     def initUI(self):
-        loadUi("main.ui", self)
         self.show()
         self.load_coffee_data()
         self.addButton.clicked.connect(self.openAddCoffeeForm)
         self.editButton.clicked.connect(self.openEditCoffeeForm)
 
     def load_coffee_data(self):
-        conn = sqlite3.connect('coffee.sqlite')
+        conn = sqlite3.connect('data/coffee.sqlite')
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM coffee")
         coffee_data = cursor.fetchall()
@@ -102,4 +103,3 @@ if __name__ == "__main__":
     window = CoffeeApp()
     sys.excepthook = except_hook
     sys.exit(app.exec_())
-
